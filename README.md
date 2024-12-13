@@ -40,15 +40,63 @@ python3 mynmap.py <target> -p <ports> [options]
    python3 mynmap.py 10.0.0.1 -p 80,443 -sT -sU
    ```
 
+## Code Explanation
+
+### Modules Imported
+- **`socket`**: Provides access to low-level networking interfaces. Used to create and manage network connections for both TCP and UDP scans.
+- **`time`**: Used for setting timeouts and managing delays during network operations.
+- **`argparse`**: Facilitates the creation of command-line interfaces for parsing and validating user-provided arguments.
+
+### Function: `parse_args()`
+- **Purpose**: Parses and validates the command-line arguments provided by the user.
+- **Details**:
+  - Uses `argparse.ArgumentParser` to define the CLI structure.
+  - Accepts `target` (positional argument) for specifying the hostname or IP.
+  - Requires `-p/--ports` to define ports to scan.
+  - Includes optional flags `-sT` for TCP scans and `-sU` for UDP scans.
+
+### Function: `parse_port_range(port_range)`
+- **Purpose**: Converts user-defined port inputs into a list of integers for easy iteration.
+- **Details**:
+  - Supports comma-separated ports (e.g., `80,443`), ranges (e.g., `20-25`), and single ports (e.g., `22`).
+  - Returns a list of port numbers for scanning.
+
+### Function: `tcp_scan(target, ports)`
+- **Purpose**: Scans specified TCP ports on the target.
+- **Details**:
+  - Creates a socket for each port with `socket.socket()`.
+  - Attempts to connect to the port using `connect_ex()`.
+  - Uses `settimeout(1)` to limit each attempt to 1 second.
+  - Prints whether the port is open or closed based on the connection result.
+
+### Function: `udp_scan(target, ports)`
+- **Purpose**: Scans specified UDP ports on the target.
+- **Details**:
+  - Sends an empty packet to each port using `sendto()`.
+  - Waits for a response with `recvfrom()`, handling potential timeouts or errors.
+  - Reports whether the port is open, filtered, or unresponsive.
+
+### Function: `main()`
+- **Purpose**: Orchestrates the program by processing arguments and invoking the appropriate scan functions.
+- **Details**:
+  - Parses command-line arguments using `parse_args()`.
+  - Extracts the target and ports, then determines which scans to perform based on flags.
+  - Calls `tcp_scan()` and/or `udp_scan()` accordingly.
+
+### Script Execution
+- The `if __name__ == "__main__":` block ensures the script runs only when executed directly.
+- Invokes the `main()` function to begin the scanning process.
+
 ## How It Works
-1. **TCP Scan (`-sT`)**:
-   - Attempts to establish a connection to each specified port.
-   - Reports if the port is open or closed.
-2. **UDP Scan (`-sU`)**:
-   - Sends an empty packet to each specified port and waits for a response.
-   - Reports if the port is open, filtered, or non-responsive.
-
-## Limitations
-- UDP scans may report ports as "filtered" if no response is received. This is due to how UDP handles communication (lack of acknowledgment).
-- Requires appropriate permissions to scan certain ports or targets.
-
+1. **Run the Script**:
+   Example: `python3 mynmap.py example.com -p 20-25 -sT -sU`.
+   - Target: `example.com`
+   - Ports: `20-25`
+   - Scans: Both TCP and UDP.
+2. **Process Arguments**:
+   - Extracts the target and ports, parsing ranges or lists.
+3. **Perform Scans**:
+   - **TCP Scan**: Connects to each port and checks if it is open.
+   - **UDP Scan**: Sends test packets and observes responses.
+4. **Output Results**:
+   - Displays port statuses (open, closed, or filtered) in the console.
