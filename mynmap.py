@@ -1,14 +1,17 @@
 import socket
-import time
+
 
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description="Simple TCP/UDP Port Scanner")
     parser.add_argument("target", help="Target IP or hostname")
-    parser.add_argument("-p", "--ports", help="Ports to scan (e.g., 20-25)", required=True)
+    parser.add_argument("-p", "--ports",
+                        help="Ports to scan (e.g., 20-25)",
+                        required=True)
     parser.add_argument("-sT", help="Perform TCP scan", action="store_true")
     parser.add_argument("-sU", help="Perform UDP scan", action="store_true")
     return parser.parse_args()
+
 
 def parse_port_range(port_range):
     ports = []
@@ -33,6 +36,7 @@ def tcp_scan(target, ports):
             else:
                 print(f"{port}/tcp is closed")
 
+
 def udp_scan(target, ports):
     print(f"Starting UDP scan on {target}...")
     for port in ports:
@@ -47,6 +51,7 @@ def udp_scan(target, ports):
             except Exception as e:
                 print(f"Error on UDP Port {port}: {e}")
 
+
 def main():
     args = parse_args()
     target = args.target
@@ -56,6 +61,7 @@ def main():
         tcp_scan(target, ports)
     if args.sU:
         udp_scan(target, ports)
+
 
 if __name__ == "__main__":
     main()
